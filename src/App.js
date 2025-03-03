@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
-import MyAddress from "./Pages/Customer/MyAddress";
-import Cod from "./Pages/Customer/Cod";
+ import Cod from "./Pages/Customer/Cod";
 import Notifycation from "./Pages/Customer/Notification";
 import   "./index.css"
+import OrderList from "./Pages/Customer/OrderList";
+import UpdateOrder from "./Pages/Customer/UpdateOrder";
+import OrderListAdmin from "./Pages/Admin/OrderList";
 // Lazy load các component
 const ContainerCustomerPage = lazy(() => import("./Pages/Customer/ContainerPage"));
 const AddOrder = lazy(() => import("./Pages/Customer/AddOrder"));
@@ -18,13 +20,19 @@ function App() {
           <Routes> 
             <Route path="/customer" element={<ContainerCustomerPage />}>
               <Route path="addOrder" element={<AddOrder />} />
-              <Route path="address" element={<MyAddress />} />
+              <Route path="updateOrder/:orderId/:type" element={<UpdateOrder />} />
+
+              <Route path="updateOrder" element={<UpdateOrder />} />
+              <Route path="address" element={<OrderList />} />
               <Route path="cod" element={<Cod />} />
               <Route path="notifycation" element={<Notifycation />} />
             </Route> 
-            <Route path="/admin" element={<ContainerAdminPage />} />
+            <Route path="/admin" element={<ContainerAdminPage />}> 
+              <Route path="orders" element={<OrderListAdmin />} /> 
+            </Route> 
             <Route path="/shipper" element={<ContainerShipperPage />} />
           </Routes>
+          
         </Suspense>
       </BrowserRouter>
     </div>

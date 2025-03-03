@@ -29,7 +29,7 @@ const ContainerCustomerPage = () => {
             {
               key: '/customer/address',
               icon: <LockOutlined />,
-              label: 'Địa chỉ',
+              label: 'Danh sách đơn',
             },
             {
               key: '/customer/cod',

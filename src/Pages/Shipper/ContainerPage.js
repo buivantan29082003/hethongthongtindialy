@@ -36,20 +36,18 @@ const ContainerShipperPage = () => {
     const data = await response.json();
 
     if (data.features.length > 0) {
-      const { center } = data.features[0]; // Lấy tọa độ đầu tiên từ kết quả
+      const { center } = data.features[0]; 
       map.flyTo({
         center,
         zoom: 14,
-        essential: true, // Giúp di chuyển mượt mà
+        essential: true, 
       });
     }
   };
 
   return (
     <>
-      <p>Hello ContainerShipperPage</p>
-
-      {/* Ô input để nhập địa chỉ */}
+      <p>Hello ContainerShipperPage</p> 
       <div className="flex items-center space-x-2 p-4">
         <input
           type="text"
@@ -64,9 +62,7 @@ const ContainerShipperPage = () => {
         >
           Tìm kiếm
         </button>
-      </div>
-
-      {/* Bản đồ */}
+      </div> 
       <div ref={mapContainerRef} className="w-full h-screen" />
     </>
   );
