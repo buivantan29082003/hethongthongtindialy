@@ -32,9 +32,9 @@ const ContainerAdminPage=()=>{
               label: 'Danh sách đơn',
             },
             {
-              key: '/customer/cod',
+              key: '/admin/phancong',
               icon: <UploadOutlined />,
-              label: 'Đối soát',
+              label: 'Phân công',
             },
             {
               key: '/customer/notifycation',
