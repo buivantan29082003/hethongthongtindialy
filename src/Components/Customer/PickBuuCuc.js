@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { Option } from "antd/es/mentions";
 
 const PickBuuCuc = ({ info, setInfo, base }) => {
+
+
+
+ 
+
   const [open, setOpen] = useState(false); 
   useEffect(() => {
     if (info.xa != undefined) {
