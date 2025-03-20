@@ -1,19 +1,27 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import 'tailwindcss/tailwind.css';
  
-const AddressTab = ({setTab }) => {
+const OrderAmindTab = ({setTab }) => {
   const [activeTab, setActiveTab] = useState('tab1');
   const [underlineStyle, setUnderlineStyle] = useState({ width: '120px', left: '0px' });
-
+  const navigate=useNavigate()
   const tabRefs = useRef([]);
 
   const switchTab = (event, tabId, index) => {
     const tabElement = tabRefs.current[index];
     const tabWidth = tabElement.offsetWidth;
     const tabLeft = tabElement.offsetLeft;
-    setTab("trangThaiId",tabId)
-    setUnderlineStyle({ width: `${tabWidth}px`, left: `${tabLeft}px` });
-    setActiveTab(tabId);
+    if(tabId==7){
+      navigate("/admin/phieuchuyengiao")
+    }else if(tabId==8){
+      navigate("/admin/dangchuyengiao")
+    }else{
+      setTab("trangThaiId",tabId)
+      setUnderlineStyle({ width: `${tabWidth}px`, left: `${tabLeft}px` });
+      setActiveTab(tabId);
+    }
+
   };
 
   useEffect(() => {
@@ -25,16 +33,16 @@ const AddressTab = ({setTab }) => {
 
   }, []);
 
-  const tabs = useMemo(() => [ 
+  const tabs = useMemo(() => [  
     { id: 1, tabName: "Chờ lấy hàng" },
-    { id: 2, tabName: "Đang lấy hàng" },
-    { id: 3, tabName: "Chờ nhận hàng."},
+    { id: 2, tabName: "Đang lấy hàng."},
+    { id: 3, tabName: "Chờ nhận hàng" },
     { id: 4, tabName: "Đã nhận hàng" },
     { id: 5, tabName: "Đã vào kho" },
-    { id: 6, tabName: "Đang giao hàng" },
+    { id: 6, tabName: "Đang giao hàng"},
     { id: 7, tabName: "Chờ chuyển tiếp"},
     { id: 8, tabName: "Đang chuyển tiếp"},
-    { id: 9, tabName: "Giao thành công"},
+    { id: 9, tabName: "Giao thành công"}, 
     { id: 10, tabName: "Hoàn kho"},
     { id: 11, tabName: "Đơn hủy"}
   ], []);
@@ -61,4 +69,4 @@ const AddressTab = ({setTab }) => {
   );
 };
 
-export default React.memo(AddressTab);
+export default React.memo(OrderAmindTab);

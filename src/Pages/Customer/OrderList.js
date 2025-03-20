@@ -12,9 +12,11 @@ const OrderList = () => {
       .post(`/customer/order/cancel?orderId=${orderId}`)
       .then((v) => v)
       .then((v) => {
-        alert("Huyr thanhf coong ");
+        alert("Hủy đơn hàng thành công");
         search();
-      });
+      }).catch(error=>{
+        alert(error.respone.message)
+      })
   };
 
   const search = () => {
@@ -232,7 +234,7 @@ const styleInput = {
 const Action = ({ cancelOrder }) => {
   return (
     <>
-      <Tag onClick={cancelOrder} icon={<YoutubeOutlined />} color="#cd201f">
+      <Tag className="cursor-pointer" onClick={cancelOrder} icon={<YoutubeOutlined />} color="#cd201f">
         Hủy đơn
       </Tag>
     </>

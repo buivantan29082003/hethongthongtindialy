@@ -109,21 +109,21 @@ const AddOrder = () => {
                   <PickAddressSender orderInsert={orderInsert} setOrderInsert={setOrderInsert} />
                 </div>
                 <div className="w-full lg:w-2/4">
-                  <Select
+                  {/* <Select
                     placeholder="Chọn ca lấy"
                     className="w-4/5 m-2 focus:border-red-500 focus:border-2 "
                   >
                     <Option value="apple">Ca sáng - 7h00</Option>
                     <Option value="banana">Ca trưa - 11h30'</Option>
-                  </Select>
+                  </Select> */}
                  
                    <PickBuuCuc base={baseData} info={orderInsert} setInfo={setOrderInsert} />
-                  <Popover
+                  {/* <Popover
                     className="inline-block mb-3 pl-2"
                     content={"Người giao hàng phải đến bưu cục để giao hàng"}
                     title="Lưu ý"
                   ><InfoCircleOutlined></InfoCircleOutlined>
-                  </Popover> 
+                  </Popover>  */}
                 </div>
               </div>
             </div>

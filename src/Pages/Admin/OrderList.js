@@ -1,41 +1,190 @@
-import { useEffect, useState } from "react";
-// import MyAddress from "./MyAddress";
-import { CheckCircleFilled, DownOutlined, SearchOutlined, YoutubeOutlined } from "@ant-design/icons";
-import {  Dropdown, Input, Menu, Pagination, Select, Tag } from "antd";
-import { Option } from "antd/es/mentions";
- import { useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import {
+  CheckCircleFilled,
+  DownOutlined,
+  SearchOutlined,
+  SyncOutlined,
+  WarningFilled,
+  YoutubeOutlined,
+} from "@ant-design/icons";
+import {
+  Button,
+  Checkbox,
+  Dropdown,
+  Input,
+  Menu,
+  Select,
+  Tag,
+  Tooltip,
+} from "antd";
 import apiAdmin from "../../Config/APICONFIG/AdminConfig";
-
+import OrderAmindTab from "./OrderTab";
+import { Link } from "react-router-dom";
+import { UserContext } from "./ContainerPage";
 const OrderListAdmin = () => {
-  
-
-  const search = () => { 
+  const { diemNhanHang, setDiemNhanHang } = useContext(UserContext);
+ 
+  const chuyenTiep = (orderId, diemNhanHangId) => {
     apiAdmin
-      .get("order/getorder")
+      .post(`order/chuyentiep?orderId=${orderId}&buuCucId=${diemNhanHangId}`)
+      .then((v) => {
+        alert("Cập nhật chuyển tiếp thành công");
+        search();
+      })
+      .catch((error) => {
+        console.log(error.response);
+        alert(error.response.data.message);
+      });
+  };
+
+  useEffect(() => {
+    apiAdmin
+      .get("phancong/allshiper")
+      .then((v) => v.data)
+      .then((v) => {
+        setShiper(
+          v.map((vv) => {
+            return { label: vv.ten, value: vv.id };
+          })
+        );
+      })
+      .catch((error) => {});
+  }, []);
+
+  const [shipper, setShiper] = useState([{ id: 1 }]);
+
+  const nextStatus = (orderId) => {
+    apiAdmin
+      .post("order/nextstatus?orderId=" + orderId)
+      .then((v) => {
+        alert("Thành công");
+      })
+      .catch((error) => {
+        alert(error.response.data.message);
+      });
+  };
+
+  const cancelOrder = (orderId) => {
+    apiAdmin
+      .post("order/cancel?orderId=" + orderId)
+      .then((v) => {
+        alert("Thành công");
+      })
+      .catch((error) => {
+        alert(error.response.data.message);
+      });
+  };
+
+  const cancelList=()=>{
+    const fetching = document.getElementById("cancel");
+    fetching.classList.remove("hidden");
+    apiAdmin.post("order/cancellist",filter.orders.filter(v=>v.checked).map(v=>v.id)).then(v=>{
+      alert("Hủy thành công")
+      search()
+    }).catch(error=>{
+      alert(error.response.data.message)
+    }).finally(()=>{
+      fetching.classList.add("hidden");
+    })
+  }
+
+  const fetching = () => {
+    const fetching = document.getElementById("fetching");
+    fetching.classList.remove("hidden");
+
+    apiAdmin
+      .post("order/transfom/groupby", {}, { responseType: "blob" })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "download.pdf";
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        alert("CÓ LỖI XẢ RA");
+      })
+      .finally(() => {
+        fetching.classList.add("hidden");
+      });
+  };
+
+  const nhanKho=()=>{
+    const fetching = document.getElementById("nhapKho");
+    fetching.classList.remove("hidden");
+    apiAdmin.post("order/nextstatuslist",filter.orders.filter(v=>v.checked).map(v=>v.id)).then(v=>{
+      alert("Nhập kho Thành công")
+      search()
+    }).catch(error=>{
+      alert(error.response.data.message)
+    }).finally(()=>{
+      fetching.classList.add("hidden");
+    })
+  }
+
+  const search = () => {
+    apiAdmin
+      .get(
+        `order/getorder?trangThaiId=${filter.trangThaiId}${
+          filter.id != null ? `&id=${filter.id}` : ``
+        }${
+          filter.tenNguoiNhan != null
+            ? `&tenNguoiNhan=${filter.tenNguoiNhan}`
+            : ``
+        }${filter.sortBy != null ? `&sortBy=${filter.sortBy}` : ``}`
+      )
       .then((v) => {
         return v.data;
       })
       .then((v) => {
-        // console.log(data)
-         setFilter((prev) => ({
-          ...prev,
-          orders: v.orders,
-          diemNhanHang:v.diemNhanHang
-        }));
+        if (filter.trangThaiId === 4) {
+          v.orders = v.orders.filter((v) => {
+            let b = false;
+            v.phanCongs.forEach((vv) => {
+              if (
+                vv.nhanVien.id == filter.shipperChoose ||
+                filter.shipperChoose == -1
+              ) {
+                b = true;
+              }
+            });
+            return b;
+          });
+          setFilter((prev) => ({
+            ...prev,
+            orders: v.orders,
+            diemNhanHang: v.diemNhanHang,
+          }));
+        } else {
+          setFilter((prev) => ({
+            ...prev,
+            orders: v.orders,
+            diemNhanHang: v.diemNhanHang,
+          }));
+        }
       });
   };
- 
 
   useEffect(search, []);
- 
 
-  const changeString = (key, value) => { 
+  const changeString = (key, value) => {
     if (String(value) && new String(value).trim().length > 0) {
       filter[key] = value;
     } else {
       filter[key] = null;
     }
-     search();
+    search();
+  };
+
+  const changeNumber = (key, value) => {
+    if (Number(value) && value > 0) {
+      filter[key] = value;
+    } else {
+      filter[key] = null;
+    }
+    search();
   };
 
   const [filter, setFilter] = useState({
@@ -47,20 +196,24 @@ const OrderListAdmin = () => {
     page: 0,
     totalPage: 0,
     orders: [],
-    diemNhanHang:new Map()
-  });  
+    diemNhanHang: new Map(),
+    orderFilter: [],
+    shipperChoose: -1,
+  });
+
+  const [stateReload, setStateReload] = useState(true);
+  const checkOrder = (index) => {
+    filter.orders[index].checked = !filter.orders[index].checked;
+    setStateReload(!stateReload);
+  };
+
   return (
     <>
-    <div style={{position:"absolute",left:"50%",right:"50%",zIndex:999}}>
-      <div dicumen className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-75 text-white p-4 rounded-xl flex items-center space-x-3 shadow-lg animate-fade-in-out">
-            <CheckCircleFilled className="text-green-500 w-6 h-6" />
-            <span>Sản phẩm đã được thêm vào Giỏ hàng</span>
-          </div> 
-      </div>
       {/* <MyAddress setTab={changeNumber} /> */}
+      <OrderAmindTab setTab={changeNumber} />
       <div className="w-full">
         <p>Filter</p>
-        <div className="w-full flex gap-1">
+        <div className="w-full flex gap-1 items-center">
           <Input
             value={filter.id}
             onChange={(e) => {
@@ -82,8 +235,8 @@ const OrderListAdmin = () => {
           <Select
             prefix={<SearchOutlined style={{ color: "#bbb" }} />}
             showSearch
-            onChange={(e) => { 
-              changeString("sortBy",e)
+            onChange={(e) => {
+              changeString("sortBy", e);
             }}
             style={{
               width: 200,
@@ -106,20 +259,47 @@ const OrderListAdmin = () => {
               },
             ]}
           />
-
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Pagination
-              defaultCurrent={filter.page}
-              total={filter.totalPage}
-              pageSize={filter.pageSize}
-              showSizeChanger={false}
+          {filter.trangThaiId === 4 && (
+            <Select
+              prefix={<SearchOutlined style={{ color: "#bbb" }} />}
+              showSearch
+              onChange={(e) => {
+                changeString("shipperChoose", e);
+                search();
+              }}
+              style={{
+                width: 200,
+              }}
+              placeholder="Chọn shipper"
+              optionFilterProp="label"
+              filterSort={(optionA, optionB) =>
+                (optionA?.label ?? "")
+                  .toLowerCase()
+                  .localeCompare((optionB?.label ?? "").toLowerCase())
+              }
+              options={shipper}
             />
-            <Select value={filter.pageSize} style={{ width: 100 }}>
-              <Option value={5}>5/ page</Option>
-              <Option value={10}>10 / page</Option>
-              <Option value={20}>20 / page</Option>
-            </Select>
-          </div>
+          )}
+
+          {filter.orders.filter(v=>v.checked).length>0&&filter.trangThaiId===5&&<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Button onClick={fetching} primary>
+               Chuyển tiếp hàng loạt
+              <SyncOutlined className="hidden" id="fetching" spin />
+            </Button>
+          </div>}
+          {filter.orders.filter(v=>v.checked).length>0&&filter.trangThaiId<5&&<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Button onClick={cancelList}  danger  >
+               Hủy đơn
+              <SyncOutlined className="hidden" id="cancel" spin />
+            </Button>
+          </div>}
+          {filter.orders.filter(v=>v.checked).length>0&&filter.trangThaiId===4&&<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Button onClick={nhanKho}  danger  >
+               Nhập kho.
+              <SyncOutlined className="hidden" id="nhapKho" spin />
+            </Button>
+          </div>}
+          
         </div>
       </div>
       <div className="overflow-x-auto mt-3">
@@ -135,15 +315,29 @@ const OrderListAdmin = () => {
               <th className="py-2 px-4 text-left">Hình thức vận chuyển</th>
               <th className="py-2 px-4 text-left">Bưu cục vận chuyển</th>
               <th className="py-2 px-4 text-left">Thao tác chuyển tiếp</th>
+              <th className="py-2 px-4 text-left">Danh sách phân công</th>
+              <th className="py-2 px-4 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filter.orders.map((order, index) => (
-              <tr  key={order.id} className="border-b hover:bg-gray-50">
-                <td className="py-2 px-4">{index + 1}</td>
-                <td className="py-2 px-4 text-blue-600 font-semibold">
+              <tr key={order.id} className="border-b hover:bg-gray-50">
+                <td className="py-2 px-2">
+                  <Checkbox  onClick={checkOrder.bind(null,index)}   /> 
+                  {order.phanCongs.filter((v) => v.trangThai === 1).length >
+                    2 && (
+                    <Tooltip
+                      className="animate-pulse [animation-duration:500ms]"
+                      title={`Đơn hàng hiện đã lấy hàng thất bại nhiều lần`}
+                      color="red"
+                    >
+                      <WarningFilled className="text-red-500 w-6 h-6 cursor-pointer" />
+                    </Tooltip>
+                  )}
+                </td>
+                <td className="py-2 px-4 text-blue-600 font-bold">
                   DH{order.id}
-                  <p>Đã lấy hàng</p>
+                  <p className="t">{order.trangThai.ten}</p>
                 </td>
                 <td className="py-2 px-4">
                   <div className="font-bold text-gray-600">
@@ -160,7 +354,7 @@ const OrderListAdmin = () => {
                   {order.fee} đ
                 </td>
                 <td className="py-2 px-4 text-blue-900 font-bold">
-                  {order.trongLuong} Kg
+                  {order.trongLuong} KG
                 </td>
                 <td className="py-2 px-4 text-blue-900 font-bold">
                   {order.khoangCachDuTinh} KM
@@ -184,30 +378,168 @@ const OrderListAdmin = () => {
                   </button>
                 </td>
                 <td>
-                    {filter.diemNhanHang[order.id]!=null? <Dropdown  overlay={<Menu>
-                        
-                         {filter.diemNhanHang[order.id].map((v,index)=>{
-                            return  <div className="">
-                                <div className="flex items-betw">
-                                    <p className="font-bold">i: </p>
-                                    <p className="font-bold">{index+1}</p>
+                  {order.trangThai.id !== 5 ? (
+                    <p>Vui lòng lấy hàng để chuyển tiếp</p>
+                  ) : order.phieuChuyenGiao != null ? (
+                    <p className="text-yellow-900">
+                      Đơn hàng đã được chuyển tiếp
+                    </p>
+                  ) : filter.diemNhanHang[order.id] != null ? (
+                    <Dropdown
+                      overlay={
+                        <Menu>
+                          {filter.diemNhanHang[order.id].map((v, index) => {
+                            return (
+                              <div className="">
+                                <div className="flex">
+                                  <div>
+                                    <div className="flex items-betw">
+                                      <p className="font-bold">i: </p>
+                                      <p className="font-bold">{index + 1}</p>
+                                    </div>
+                                    <p className="font-bold">
+                                      Địa điểm: {index + 1}
+                                    </p>
+                                    <p>
+                                      Điểm nhận hàng: DNH {v.diemNhanHangId}
+                                    </p>
+                                    <p>
+                                      Khoảng cách ban đầu:{" "}
+                                      {v.khoangCachDuTinh.toFixed(2)} Km
+                                    </p>
+                                    <p>
+                                      Khoảng cách nếu chuyển tiếp:{" "}
+                                      {v.khoangCachDuTinhNeChuyenTiep.toFixed(
+                                        2
+                                      )}{" "}
+                                      KM
+                                    </p>
+                                    <p>Địa chỉ chi tiết: {v.diChiChiTiet}</p>
+                                  </div>
+                                  <Button
+                                    onClick={() => {
+                                      chuyenTiep(order.id, v.diemNhanHangId);
+                                    }}
+                                  >
+                                    Chuyển tiếp
+                                  </Button>
                                 </div>
-                                <div className="flex items-betw">
-                                    <p className="font-bold">Địa điểm: </p>
-                                    <p className="font-bold">{index+1}</p>
-                                </div>
-                                <p>Địa điểm: {index+1}</p>
-                                <p>Điểm nhận hàng: DNH {v.diemNhanHangId}</p>  
-                                <p>Khoảng cách ban đầu:   {v.khoangCachDuTinh}</p>   
-                                <p>Khoảng cách nếu chuyển tiếp:   {v.khoangCachDuTinhNeChuyenTiep}</p> 
-                                <p>Địa chỉ chi tiết:   {v.diChiChiTiet}</p> 
-                                <hr/>
-                            </div> 
-                         })}
-                    </Menu>} placement="topCenter" arrow>
-                    <p className="text-blue-500 font-bold cursor-pointer">Các điểm chuyển tiếp <DownOutlined style={{display:"inline-block"}} /></p>
-                </Dropdown>:<p className="text-red-500 font-bold">Không có điểm nhận hàng</p>}
-               
+                                <hr />
+                              </div>
+                            );
+                          })}
+                        </Menu>
+                      }
+                      placement="topCenter"
+                      arrow
+                    >
+                      <p className="text-blue-500 font-bold cursor-pointer">
+                        Danh sách điểm chuyển tiếp{" "}
+                        <DownOutlined style={{ display: "inline-block" }} />
+                      </p>
+                    </Dropdown>
+                  ) : (
+                    <p className="text-red-500 font-bold">
+                      Không tìm thấy điểm chuyển tiếp phù hợp
+                    </p>
+                  )}
+                </td>
+                <td className="py-2 px-4">
+                  {order.phanCongs?.length < 0 ? (
+                    <p className="text-yellow-900">
+                      Chưa có danh sách phân công
+                    </p>
+                  ) : (
+                    <Dropdown
+                      overlay={
+                        <Menu
+                          style={{ maxHeight: "300px", overflowY: "auto" }}
+                          className=" scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-200"
+                        >
+                          {order.phanCongs
+                            .slice()
+                            .reverse()
+                            .map((v, index) => {
+                              return (
+                                <Menu.Item key={index}>
+                                  <div className="flex">
+                                    <div>
+                                      <p>
+                                        Loại phân công :{" "}
+                                        <strong>
+                                          {v.donGiao === 0
+                                            ? "Lấy hàng"
+                                            : "Giao hàng"}
+                                        </strong>
+                                      </p>
+                                      <p>
+                                        Nhân viên:{" "}
+                                        <strong>{v.nhanVien.ten}</strong>
+                                      </p>
+                                      <p>
+                                        Địa chỉ{" "}
+                                        {v.donGiao === 0
+                                          ? "Lấy hàng"
+                                          : "Giao hàng"}{" "}
+                                        :{" "}
+                                        <strong>
+                                          {v.donGiao === 0
+                                            ? order.xa.tenXa +
+                                              " - " +
+                                              order.xa.huyen.tenHuyen
+                                            : "Giao hàng"}
+                                        </strong>
+                                      </p>
+                                    </div>
+
+                                    {/* Đẩy Tag sang phải bằng ml-auto */}
+                                    <div className="ml-auto">
+                                      <Tag color="magenta">
+                                        {v.trangThai === 0
+                                          ? "Đang thực hiện"
+                                          : v.trangThai === 1
+                                          ? "Không thành công"
+                                          :v.trangThai === 0
+                                          ? "Đang thực hiện"
+                                          : v.trangThai === 2
+                                          ? "Thành công"
+                                          : "Ngưng thực hiện"}
+                                      </Tag>
+                                    </div>
+                                  </div>
+                                  <hr
+                                    style={{ border: "1px solid lightgray" }}
+                                  />
+                                </Menu.Item>
+                              );
+                            })}
+                        </Menu>
+                      }
+                      placement="topCenter"
+                      arrow
+                    >
+                      <p className="text-blue-500 font-bold cursor-pointer">
+                        {order.phanCongs.length > 0 ? (
+                          <>
+                            Lịch sử{" "}
+                            <DownOutlined style={{ display: "inline-block" }} />
+                          </>
+                        ) : (
+                          <>Trống</>
+                        )}
+                      </p>
+                    </Dropdown>
+                  )}
+                </td>
+                <td className="py-2 px-4">
+                  <Action
+                    trangThaiId={filter.trangThaiId}
+                    handle={
+                      filter.trangThaiId < 4
+                        ? cancelOrder.bind(null, order.id)
+                        : nextStatus.bind(null, order.id)
+                    }
+                  />
                 </td>
               </tr>
             ))}
@@ -226,14 +558,45 @@ const styleInput = {
   boxShadow: "none",
 };
 
-const Action = ({ cancelOrder }) => {
-  return (
-    <>
-      <Tag onClick={cancelOrder} icon={<YoutubeOutlined />} color="#cd201f">
-        Hủy đơn
-      </Tag>
-    </>
-  );
+const Action = ({ handle, trangThaiId }) => {
+  switch (trangThaiId) {
+    case 1:
+    case 2:
+    case 3:
+      return (
+        <Tag
+          className="cursor-pointer"
+          onClick={handle}
+          icon={<YoutubeOutlined />}
+          color="#cd201f"
+        >
+          Hủy đơn
+        </Tag>
+      );
+    case 4:
+      return (
+        <Tag
+          className="cursor-pointer"
+          onClick={handle}
+          icon={<YoutubeOutlined />}
+          color="#cd201f"
+        >
+          Tiếp tục xử lý
+        </Tag>
+      );
+    case 5:
+      return (
+        <Link
+          className="cursor-pointer"
+          to={"/admin/phancong"}
+          icon={<YoutubeOutlined />}
+          color="#cd201f"
+        >
+          Phân công
+        </Link>
+      );
+    default:
+      <></>;
+  }
 };
-
 export default OrderListAdmin;

@@ -7,6 +7,10 @@ import OrderList from "./Pages/Customer/OrderList";
 import UpdateOrder from "./Pages/Customer/UpdateOrder";
 import OrderListAdmin from "./Pages/Admin/OrderList";
 import PhanCong from "./Pages/Admin/PhanCong";
+import BarcodeScanner from "./Pages/Admin/ScanBardCode";
+import PhieuChuyenGiao from "./Pages/Admin/PhieuChuyenGiao";
+import DangChuyenGiao from "./Pages/Admin/DangCuyenGiao";
+import PhanCongLayHang from "./Pages/Admin/PhanCongLayHang";
 const ContainerCustomerPage = lazy(() => import("./Pages/Customer/ContainerPage"));
 const AddOrder = lazy(() => import("./Pages/Customer/AddOrder"));
 const ContainerAdminPage = lazy(() => import("./Pages/Admin/ContainerPage"));
@@ -29,7 +33,11 @@ function App() {
             </Route> 
             <Route path="/admin" element={<ContainerAdminPage />}> 
               <Route path="orders" element={<OrderListAdmin />} /> 
-            <Route path="phancong" element={<PhanCong/>}/>
+              <Route path="scan" element={<BarcodeScanner />} />
+              <Route path="phancong" element={<PhanCong/>}/>
+              <Route path="phanconglay" element={<PhanCongLayHang/>}/> 
+              <Route path="phieuchuyengiao" element={<PhieuChuyenGiao/>}/>
+              <Route  path="dangchuyengiao" element={<DangChuyenGiao></DangChuyenGiao>}/>
             </Route> 
             <Route path="/shipper" element={<ContainerShipperPage />} />
           </Routes>

@@ -25,7 +25,7 @@ import { Option } from "antd/es/mentions";
 import { useEffect, useState } from "react";
 import apiAdmin from "../../Config/APICONFIG/AdminConfig";
 
-const PhanCong = () => {
+const PhanCongLayHang = () => {
   const [expandIconPosition, setExpandIconPosition] = useState("start");
   const onPositionChange = (newExpandIconPosition) => {
     setExpandIconPosition(newExpandIconPosition);
@@ -41,7 +41,7 @@ const PhanCong = () => {
   });
 
   const phanCong=()=>{
-    apiAdmin.post("order/phancong",data.data).then(v=>{
+    apiAdmin.post("order/phanconglayhang",data.data).then(v=>{
       alert("Đã phân công cho các đơn hàng")
     }).catch(error=>{
       alert(error.response.data.message)
@@ -54,7 +54,7 @@ const PhanCong = () => {
       .map((shipper) => shipper.id); 
     if(selectedShipperIds.length>0){
       apiAdmin
-      .post(`order/phancong/${data.maxOrder}`,selectedShipperIds)
+      .post(`order/phanconglay/${data.maxOrder}`,selectedShipperIds)
       .then((v) => {
         return v.data;
       })
@@ -331,4 +331,4 @@ const PhanCong = () => {
   );
 };
 
-export default PhanCong;
+export default PhanCongLayHang;
