@@ -1,71 +1,98 @@
-import { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
-import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
-import mapBoxConfig from "../../Config/MapboxConfig";
+import { LockOutlined, MenuFoldOutlined, MenuUnfoldOutlined, NotificationOutlined, OrderedListOutlined, UploadOutlined    } from "@ant-design/icons";
+import { Button, Layout, Menu } from "antd";
+import { Content, Footer, Header } from "antd/es/layout/layout";
+import Sider from "antd/es/layout/Sider";
+import { useEffect, useState } from "react";
+import {  Outlet, useNavigate } from "react-router-dom";
 
-mapboxgl.accessToken = mapBoxConfig.accessToken;
+const ContainerShipper = () => {
+  const [collapsed, setCollapsed] = useState(false);
+  const navigate=useNavigate();
+  const [position, setPosition] = useState({ latitude: null, longitude: null });
 
-const ContainerShipperPage = () => {
-  const mapContainerRef = useRef(null);
-  const [map, setMap] = useState(null);
-  const [searchText, setSearchText] = useState("");
-
-  useEffect(() => {
-    const newMap = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/streets-v11",
-      center: [106.660172, 10.762622], // (longitude, latitude)
-      zoom: 10,
-    });
-
-    setMap(newMap);
-
-    return () => newMap.remove();
-  }, []);
-
-  // Hàm xử lý tìm kiếm
-  const handleSearch = async () => {
-    if (!searchText.trim()) return;
-
-    const response = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-        searchText
-      )}.json?access_token=${mapboxgl.accessToken}`
-    );
-    const data = await response.json();
-
-    if (data.features.length > 0) {
-      const { center } = data.features[0]; 
-      map.flyTo({
-        center,
-        zoom: 14,
-        essential: true, 
-      });
-    }
-  };
-
+  // useEffect(()=>{
+  //   if (!navigator.geolocation) {
+  //     alert("Trình duyệt của bạn không hỗ trợ Geolocation!");
+  //     return;
+  //   }else{
+  //     const watchId = navigator.geolocation.watchPosition(
+  //       (pos) => {
+  //         alert("dckdcdcbdjcbdc")
+  //         setPosition({
+  //           latitude: pos.coords.latitude,
+  //           longitude: pos.coords.longitude,
+  //         });
+  //       },
+  //       (err) => {
+  //         console.error("Lỗi khi lấy vị trí:", err);
+  //       },
+  //       {
+  //         enableHighAccuracy: true, // Bật GPS chính xác cao
+  //         maximumAge: 0, // Luôn lấy vị trí mới nhất
+  //         timeout: 5000, // Giới hạn thời gian chờ
+  //       }
+  //     );
+  
+  //     // Dọn dẹp khi component bị hủy
+  //     return () => navigator.geolocation.clearWatch(watchId);
+  //   }
+  // },[])
   return (
     <>
-      <p>Hello ContainerShipperPage</p> 
-      <div className="flex items-center space-x-2 p-4">
-        <input
-          type="text"
-          placeholder="Nhập địa chỉ..."
-          className="px-4 py-2 border rounded-lg w-80 shadow-md"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+      <Layout style={{ minHeight: "100vh" }}> 
+        <Sider collapsible collapsed={collapsed} trigger={null}>
+        <Menu
+          theme="dark"
+          mode="inline"
+          defaultSelectedKeys={['1']}
+          onClick={(e) => { 
+            navigate(e.key); 
+            
+          }}
+          items={[
+            {
+              key: '/customer/addOrder',
+              icon: <OrderedListOutlined/>,
+              label: 'Đơn hàng chờ lấy',
+            },
+            {
+              key: '/customer/address',
+              icon: <LockOutlined />,
+              label: 'Đơn hàng chờ giao',
+            } 
+          ]}
         />
-        <button
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-          onClick={handleSearch}
-        >
-          Tìm kiếm
-        </button>
-      </div> 
-      <div ref={mapContainerRef} className="w-full h-screen" />
+        </Sider>
+        <Layout>
+          <Header
+            style={{
+              background: "#fff",
+              padding: "0 20px",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              style={{ fontSize: "18px", marginRight: "16px" }}
+            />
+            <h2 style={{ margin: 0 }}>Grab Express</h2>
+          </Header>
+
+          {/* Nội dung trang */}
+          <Content
+            style={{ margin: "20px", padding: "20px", background: "#fff" }}
+          >
+            <Outlet />
+          </Content>
+
+          {/* Footer */}
+          <Footer style={{ textAlign: "center" }}>© 2025 My App</Footer>
+        </Layout>
+      </Layout>
     </>
   );
 };
-
-export default ContainerShipperPage;
+export default ContainerShipper;

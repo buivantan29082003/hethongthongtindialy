@@ -11,6 +11,7 @@ import BarcodeScanner from "./Pages/Admin/ScanBardCode";
 import PhieuChuyenGiao from "./Pages/Admin/PhieuChuyenGiao";
 import DangChuyenGiao from "./Pages/Admin/DangCuyenGiao";
 import PhanCongLayHang from "./Pages/Admin/PhanCongLayHang";
+import OrderLayHang from "./Pages/Shipper/DonLayHang";
 const ContainerCustomerPage = lazy(() => import("./Pages/Customer/ContainerPage"));
 const AddOrder = lazy(() => import("./Pages/Customer/AddOrder"));
 const ContainerAdminPage = lazy(() => import("./Pages/Admin/ContainerPage"));
@@ -39,7 +40,9 @@ function App() {
               <Route path="phieuchuyengiao" element={<PhieuChuyenGiao/>}/>
               <Route  path="dangchuyengiao" element={<DangChuyenGiao></DangChuyenGiao>}/>
             </Route> 
-            <Route path="/shipper" element={<ContainerShipperPage />} />
+            <Route path="/shipper" element={<ContainerShipperPage />} >
+              <Route path="orderlay" element={<OrderLayHang />} /> 
+            </Route>
           </Routes>
           
         </Suspense>
