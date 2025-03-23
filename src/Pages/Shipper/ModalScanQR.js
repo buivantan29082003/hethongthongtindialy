@@ -105,7 +105,7 @@ const ScanQRCode = ({ order, setOrder }) => {
 
   return (
     <>
-      <div style={{ position: "absolute", top: "0px", right: "0%" }}>
+      <div style={{ position: "absolute", top: "0px", right: "0%" ,zIndex:"999"}}>
         <Button type="primary" onClick={showModal}>
           Quét mã <img src={QRScan} style={{ width: "15px" }} alt="QR Scan" />
         </Button>

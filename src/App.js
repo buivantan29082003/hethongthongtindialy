@@ -12,6 +12,7 @@ import PhieuChuyenGiao from "./Pages/Admin/PhieuChuyenGiao";
 import DangChuyenGiao from "./Pages/Admin/DangCuyenGiao";
 import PhanCongLayHang from "./Pages/Admin/PhanCongLayHang";
 import OrderLayHang from "./Pages/Shipper/DonLayHang";
+import OrderGiaoHang from "./Pages/Shipper/DonGiao";
 const ContainerCustomerPage = lazy(() => import("./Pages/Customer/ContainerPage"));
 const AddOrder = lazy(() => import("./Pages/Customer/AddOrder"));
 const ContainerAdminPage = lazy(() => import("./Pages/Admin/ContainerPage"));
@@ -42,6 +43,7 @@ function App() {
             </Route> 
             <Route path="/shipper" element={<ContainerShipperPage />} >
               <Route path="orderlay" element={<OrderLayHang />} /> 
+              <Route path="ordergiao" element={<OrderGiaoHang/>} /> 
             </Route>
           </Routes>
           

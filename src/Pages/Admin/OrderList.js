@@ -103,8 +103,8 @@ const OrderListAdmin = () => {
         a.click();
         window.URL.revokeObjectURL(url);
       })
-      .catch((error) => {
-        alert("CÓ LỖI XẢ RA");
+      .catch((error) => { 
+        alert(error.response.status===400?"Không có đơn hàng nào cần chuyển tiếp":"Có lỗi xảy ra");
       })
       .finally(() => {
         fetching.classList.add("hidden");
