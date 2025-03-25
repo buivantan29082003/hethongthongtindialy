@@ -1,6 +1,5 @@
-import { useContext, useEffect, useState } from "react";
-import {
-  CheckCircleFilled,
+import {  useEffect, useState } from "react";
+import { 
   DownOutlined,
   SearchOutlined,
   SyncOutlined,
@@ -20,10 +19,10 @@ import {
 import apiAdmin from "../../Config/APICONFIG/AdminConfig";
 import OrderAmindTab from "./OrderTab";
 import { Link } from "react-router-dom";
-import { UserContext } from "./ContainerPage";
+ import ModalInfoPhieuChuyenGiao from "./ModalInfoPhieuChuyenGiao";
 const OrderListAdmin = () => {
-  const { diemNhanHang, setDiemNhanHang } = useContext(UserContext);
- 
+  // const { diemNhanHang, setDiemNhanHang } = useContext(UserContext);
+  const [phieuChuyenGiaos,setPhieuChuyenGiao]=useState([])
   const chuyenTiep = (orderId, diemNhanHangId) => {
     apiAdmin
       .post(`order/chuyentiep?orderId=${orderId}&buuCucId=${diemNhanHangId}`)
@@ -36,6 +35,46 @@ const OrderListAdmin = () => {
         alert(error.response.data.message);
       });
   };
+
+  const clickPhieuChuyenGiao=()=>{
+    let a=filter.orders.filter(v=>v.checked).map(v=>v.id);
+    if(a.length>0){
+      apiAdmin.post("order/transfom/groupby/get",a).then(v=>{
+        alert("Hellow")
+        setPhieuChuyenGiao(v.data.data)
+      }).catch(error=>{
+        alert("Có lỗi lấy dữ liệu")
+      })
+    }else{
+      alert("Chưa chọn đơn hàng nào để lập phiếu chuyển giao")
+    }
+
+  }
+
+  const exportPDF=()=>{
+    let ids=filter.orders.filter(v=>v.checked).map(v=>v.id);
+    try {
+      if(ids.length>0){
+        apiAdmin.post("order/export-pdf", ids, { responseType: "blob" })
+  .then(response => {
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "order.pdf";  // Đặt tên file
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  })
+  .catch(error => {
+    alert("Lỗi khi tải PDF:", error);
+  });
+
+      }
+    } catch (error) {
+      
+    }
+  }
 
   useEffect(() => {
     apiAdmin
@@ -169,6 +208,12 @@ const OrderListAdmin = () => {
 
   useEffect(search, []);
 
+
+  const reload=()=>{
+    search();
+    setPhieuChuyenGiao([])
+  }
+
   const changeString = (key, value) => {
     if (String(value) && new String(value).trim().length > 0) {
       filter[key] = value;
@@ -208,8 +253,7 @@ const OrderListAdmin = () => {
   };
 
   return (
-    <>
-      {/* <MyAddress setTab={changeNumber} /> */}
+    <> 
       <OrderAmindTab setTab={changeNumber} />
       <div className="w-full">
         <p>Filter</p>
@@ -259,6 +303,7 @@ const OrderListAdmin = () => {
               },
             ]}
           />
+          {filter.trangThaiId===5&&<ModalInfoPhieuChuyenGiao reloads={reload}  phieuChuyenGiaos={phieuChuyenGiaos}/>}
           {filter.trangThaiId === 4 && (
             <Select
               prefix={<SearchOutlined style={{ color: "#bbb" }} />}
@@ -280,9 +325,17 @@ const OrderListAdmin = () => {
               options={shipper}
             />
           )}
+          {filter.orders.filter(v=>v.checked).length>0&&<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Button onClick={exportPDF} primary>
+               Export PDFs
+              <SyncOutlined className="hidden" id="fetching" spin />
+            </Button>
+          </div>}
 
           {filter.orders.filter(v=>v.checked).length>0&&filter.trangThaiId===5&&<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Button onClick={fetching} primary>
+            <Button onClick={()=>{
+              clickPhieuChuyenGiao()
+            }} primary>
                Chuyển tiếp hàng loạt
               <SyncOutlined className="hidden" id="fetching" spin />
             </Button>
