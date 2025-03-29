@@ -1,13 +1,11 @@
 import apiShipper from "../../Config/APICONFIG/ShipperAPI";
-import DrawerOrder from "./DrawerOrder";
+import DrawerOrder from "../Shipper/DrawerOrderGiaoHang";
 import { useEffect, useState, useRef } from "react";
 import ScanQRCode from "./ModalScanQR";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import mapBoxConfig from "../../Config/MapboxConfig";
 import QLKD from "./Quanlykhungduong"
-import { ref, set } from "firebase/database";
-import { database } from "../../Config/APICONFIG/FirebaseConfigTwo";
 const accessTokenMap = mapBoxConfig.accessToken;
 mapboxgl.accessToken = accessTokenMap;
 
@@ -29,38 +27,33 @@ const OrderLayHang = () => {
   const markers = useRef([]);
   const markerRef = useRef(null);
   const startMarkerRef = useRef(null);
-  
+  ////
+  // giải quyết vấn đề thời gian thực
   const [isMoving, setIsMoving] = useState(false);
   const routeCoordinatesRef = useRef([]);
   const animationRef = useRef(null);
   const currentIndex = useRef(0);
   //
-  const statusId = 1;
-  const iddichuyen=useRef(0)
-  const statusIdDangLay = 2;
+  const statusId = 6;
+  const statusIdDangLay = 12;
   const [marker, setmarker] = useState([])
   const [load, setload] = useState(false)
   const moveMarker = () => {
     if (!isMoving || currentIndex.current >= routeCoordinatesRef.current.length) return;
+
     const [lng, lat] = routeCoordinatesRef.current[currentIndex.current];
     startMarkerRef.current.setLngLat([lng, lat]);
+
     currentIndex.current += 1;
-    const re = ref(database, `dialy/${iddichuyen.current}`);
-    set(re, {
-        lat: lat, 
-        lng: lng
-    }).then(() => {
-        console.log(`Dữ liệu đã được lưu thành công với key: ${iddichuyen.current}`);
-    }).catch((error) => {
-        console.error("Lỗi khi lưu dữ liệu:", error);
-    });
-    animationRef.current = setTimeout(moveMarker, 1000);
+
+    animationRef.current = setTimeout(moveMarker, 500);
   };
   const startMoving = () => {
     if (!routeCoordinatesRef.current.length) {
       alert("Chưa có tuyến đường!");
       return;
     }
+
     setIsMoving(true);
     moveMarker();
   };
@@ -79,28 +72,26 @@ const OrderLayHang = () => {
     }
   };
   useEffect(() => {
-    apiShipper.get("order/status?status=" + statusId)
+    apiShipper.get("ordersend/status?status=" + statusId)
       .then(v => {
         setOrders(v.data.data);
       })
       .catch(error => {
         alert("Có lỗi lấy dữ liệu");
       });
-    apiShipper.get("giaoThanhCongTrongNgay")
+    apiShipper.get("giaoThanhCongTrongNgaysend")
       .then(v => {
         setdanhsachthanhcon(v.data.data);
-       
       })
       .catch(error => {
         alert("Có lỗi lấy dữ liệu");
       });
 
-    apiShipper.get("order/status?status=" + statusIdDangLay)
+    apiShipper.get("ordersend/status?status=" + statusIdDangLay)
       .then(v => {
         setdsdanggiao(v.data.data);
         if (destination.lat == 0 && destination.lng == 0 && v?.data?.data?.length != 0) {
           setDestination({ lat: v?.data?.data?.[0].xa.viDo, lng: v?.data?.data?.[0].xa.kinhDo })
-          iddichuyen.current=v?.data?.data?.[0].id
         }
       })
       .catch(error => {
@@ -111,7 +102,7 @@ const OrderLayHang = () => {
 
 
   useEffect(() => {
-    apiShipper.get("giaoThanhCongTrongNgay")
+    apiShipper.get("giaoThanhCongTrongNgaysend")
       .then(v => {
         setdanhsachthanhcon(v.data.data);
       })
@@ -119,19 +110,18 @@ const OrderLayHang = () => {
         alert("Có lỗi lấy dữ liệu");
       });
 
-    apiShipper.get("order/status?status=" + statusId)
+    apiShipper.get("ordersend/status?status=" + statusId)
       .then(v => {
         setOrders(v.data.data);
       })
       .catch(error => {
         alert("Có lỗi lấy dữ liệu");
       });
-    apiShipper.get("order/status?status=" + statusIdDangLay)
+    apiShipper.get("ordersend/status?status=" + statusIdDangLay)
       .then(v => {
         setdsdanggiao(v.data.data);
         if (destination.lat == 0 && destination.lng == 0 && v?.data?.data?.length != 0) {
           setDestination({ lat: v?.data?.data?.[0].xa.viDo, lng: v?.data?.data?.[0].xa.kinhDo })
-          iddichuyen.current=v?.data?.data?.[0].id
         }
       })
       .catch(error => {
@@ -263,11 +253,11 @@ const OrderLayHang = () => {
         startMarkerRef.current.remove();
         startMarkerRef.current = null;
       }
-      if (map.current.getLayer("route")) {
+      if (map.current?.getLayer("route")) {
         map.current.removeLayer("route");
         map.current.removeSource("route");
       }
-      return;
+      return
     }
 
     if (!userLocation.lat || !userLocation.lng) {
@@ -327,8 +317,6 @@ const OrderLayHang = () => {
       console.error("Lỗi khi lấy tuyến đường:", error);
     }
   };
-
-
   useEffect(() => {
     if (!map.current) {
       return;
@@ -356,6 +344,7 @@ const OrderLayHang = () => {
     else{
       getRoute();
     }
+    
   }, [destination, userLocation]);
 
 
@@ -379,7 +368,7 @@ const OrderLayHang = () => {
           paddingTop: "6px", paddingBottom: "6px", borderRadius: "5px", marginRight:"20px"
         }} onClick={resetMovement}>Quay lại</button>
 
-        <DrawerOrder setUserLocation={setUserLocation} iddichuyen={iddichuyen} userLocation={userLocation} setOrders={setOrders} setdstoado={setdstoado} tc={dsthanhcong} load={load} setload={setload} dsdanglay={dsdanggiao} toado={destination} setToado={setDestination} title={"Xem lấy hàng"} orders={orders} />
+        <DrawerOrder setUserLocation={setUserLocation}  userLocation={userLocation} setOrders={setOrders} setdstoado={setdstoado} tc={dsthanhcong} load={load} setload={setload} dsdanglay={dsdanggiao} toado={destination} setToado={setDestination} title={"Xem lấy hàng"} orders={orders} />
       </div>
 
       <ScanQRCode setOrder={setOrder} order={order} />

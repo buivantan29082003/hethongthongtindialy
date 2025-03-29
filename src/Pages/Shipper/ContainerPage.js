@@ -51,14 +51,19 @@ const ContainerShipper = () => {
           }}
           items={[
             {
-              key: '/customer/addOrder',
+              key: 'orderlay',
               icon: <OrderedListOutlined/>,
               label: 'Đơn hàng chờ lấy',
             },
             {
-              key: '/customer/address',
+              key: 'ordergiao',
               icon: <LockOutlined />,
               label: 'Đơn hàng chờ giao',
+            },
+            {
+              key: 'thongke',
+              icon: <LockOutlined />,
+              label: 'Quản lý quá trình',
             } 
           ]}
         />

@@ -238,14 +238,14 @@ const AddOrder = () => {
             </div>
           </div>
           <div>
-            <Select
+            {/* <Select
               placeholder="Chọn một tùy chọn"
               className="w-[95%] m-2 focus:border-red-500 focus:border-2 "
               //   onChange={handleChange}
             >
               <Option value="apple">🍎 Người gửi trả hàng</Option>
               <Option value="banana">🍌 Người nhận trả tiền</Option>
-            </Select>
+            </Select> */}
             <Button
               className="w-[95%] m-2 border-2 "
               color="danger"
