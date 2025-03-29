@@ -13,6 +13,7 @@ const OrderListModal = ({ orders }) => {
     { title: "Điểm nhận", dataIndex: ["diemNhanHang", "diachichitiet"], key: "diemNhanHang", width: 200 },
     { title: "Loại hàng", dataIndex: ["loaiHang", "ten"], key: "loaiHang", width: 120 },
     { title: "Hình thức VC", dataIndex: ["hinhThucVanChuyen", "tenHinhThuc"], key: "hinhThucVanChuyen", width: 130 },
+    { title: "Phí ship", dataIndex: "fee", key: "fee", width: 100, render: (fee) => `${fee.toLocaleString()} đ` },
   ];
 
   return (
