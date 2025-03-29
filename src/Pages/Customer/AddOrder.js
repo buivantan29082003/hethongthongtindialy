@@ -45,29 +45,25 @@ const AddOrder = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          responseType: "blob", // 👈 Quan trọng: nhận response dưới dạng file
+          responseType: "blob", 
         }
       );
-  
-      // Tạo một URL object từ Blob
       const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
-  
-      // Tạo thẻ <a> để tải file
       const a = document.createElement("a");
       a.href = url;
-      a.download = "order.pdf"; // 👈 Đặt tên file tải về
+      a.download = "order.pdf"; 
       document.body.appendChild(a);
       a.click();
-  
-      // Xóa URL object sau khi tải xong
       window.URL.revokeObjectURL(url);
   
       alert("Tải file thành công!");
   
     } catch (error) {
       console.error("Lỗi khi tải file:", error);
-      alert(error.response?.data?.message || "Có lỗi xảy ra");
+      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra khi tải file!";
+      
+      alert(errorMessage);
     }
   };
   
