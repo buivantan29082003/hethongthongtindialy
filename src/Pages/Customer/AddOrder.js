@@ -31,6 +31,9 @@ const AddOrder = () => {
       "viDo": -1,
       "layTienTaiCho": false,
       "sdtnguoiNhan": " ", 
+      "longSend":-1,
+      "latSend":-1,
+      "diaChiNguoiGui":""
   })
   
   const submit = async () => {
@@ -122,7 +125,7 @@ const AddOrder = () => {
             <div>
               <div className="flex flex-wrap">
                 <div className="w-full lg:w-2/4"> 
-                  <PickAddressSender orderInsert={orderInsert} setOrderInsert={setOrderInsert} />
+                Địa chỉ <PickAddress  type={1} setDiaChi={setOrderInsert} />
                 </div>
                 <div className="w-full lg:w-2/4">
                   {/* <Select
@@ -158,7 +161,7 @@ const AddOrder = () => {
                 </div>
                 <div className="w-full lg:w-2/4">
                   <p  className="font-semibold text-md mb-2 ml-2">
-                    Địa chỉ <PickAddress setDiaChi={setOrderInsert} />
+                    Địa chỉ <PickAddress type={2} setDiaChi={setOrderInsert} />
                   </p>
                   <input className="w-4/5 m-2 border rounded-md p-2 border border-gray-300" value={orderInsert.diaChiChiTiet}></input>
                 </div>

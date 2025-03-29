@@ -30,17 +30,7 @@ const ContainerCustomerPage = () => {
               key: '/customer/address',
               icon: <LockOutlined />,
               label: 'Danh sách đơn',
-            },
-            {
-              key: '/customer/cod',
-              icon: <UploadOutlined />,
-              label: 'Đối soát',
-            },
-            {
-              key: '/customer/notifycation',
-              icon: <NotificationOutlined />,
-              label: 'Thông báo',
-            },
+            } 
           ]}
         />
         </Sider>

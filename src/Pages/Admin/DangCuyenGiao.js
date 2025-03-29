@@ -23,6 +23,42 @@ const DangChuyenGiao = () => {
             });
     };
 
+    
+    const generatePDF = (id) => {
+        alert(id)
+        let a = [id]; 
+        apiAdmin.post("phieuchuyengiao/exportpdf", a, { responseType: "blob" }) 
+            .then((response) => {
+                if (response.data.type === "application/json") {
+                    // Nếu response trả về JSON (báo lỗi), chuyển sang đọc lỗi từ JSON
+                    response.data.text().then((text) => {
+                        const error = JSON.parse(text);
+                        alert(error.message || "Lỗi không xác định");
+                    });
+                    return;
+                }
+    
+                // Tạo URL từ blob
+                const blob = new Blob([response.data], { type: "application/pdf" });
+                const url = window.URL.createObjectURL(blob);
+    
+                // Tạo thẻ <a> để tải file
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "shipping_label.pdf"; // Tên file tải về
+                document.body.appendChild(link);
+                link.click();
+     
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch((error) => {
+                alert(error.response?.data?.message || "Lỗi khi xuất PDF");
+            });
+    };
+    
+
+
     useEffect(() => {
         getAllPhieuChuyenGiao();
     }, []);
@@ -94,7 +130,9 @@ const DangChuyenGiao = () => {
                                 <OrderListModal orders={item.orderList}/>
                             </td>
                             <td className="border border-gray-300 p-2">
-                                <Button size="small" type="primary">Xuất phiếu <PrinterFilled/> </Button>
+                                <Button onClick={()=>{ 
+                                    generatePDF(item.phieuChuyenGiao.id)
+                                }} size="small" type="primary">Xuất phiếu <PrinterFilled/> </Button>
                             </td>
                             <td className="border border-gray-300 p-2">
                                 <ModalComfirm item={item} reload={getAllPhieuChuyenGiao}/>

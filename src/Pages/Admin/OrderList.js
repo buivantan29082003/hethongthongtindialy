@@ -1,5 +1,5 @@
-import {  useEffect, useState } from "react";
-import { 
+import { useEffect, useState } from "react";
+import {
   DownOutlined,
   SearchOutlined,
   SyncOutlined,
@@ -7,6 +7,7 @@ import {
   YoutubeOutlined,
 } from "@ant-design/icons";
 import {
+  Breadcrumb,
   Button,
   Checkbox,
   Dropdown,
@@ -19,10 +20,10 @@ import {
 import apiAdmin from "../../Config/APICONFIG/AdminConfig";
 import OrderAmindTab from "./OrderTab";
 import { Link } from "react-router-dom";
- import ModalInfoPhieuChuyenGiao from "./ModalInfoPhieuChuyenGiao";
+import ModalInfoPhieuChuyenGiao from "./ModalInfoPhieuChuyenGiao";
+import BreadcrumbItem from "antd/es/breadcrumb/BreadcrumbItem";
 const OrderListAdmin = () => {
-  // const { diemNhanHang, setDiemNhanHang } = useContext(UserContext);
-  const [phieuChuyenGiaos,setPhieuChuyenGiao]=useState([])
+  const [phieuChuyenGiaos, setPhieuChuyenGiao] = useState([]);
   const chuyenTiep = (orderId, diemNhanHangId) => {
     apiAdmin
       .post(`order/chuyentiep?orderId=${orderId}&buuCucId=${diemNhanHangId}`)
@@ -36,45 +37,46 @@ const OrderListAdmin = () => {
       });
   };
 
-  const clickPhieuChuyenGiao=()=>{
-    let a=filter.orders.filter(v=>v.checked).map(v=>v.id);
-    if(a.length>0){
-      apiAdmin.post("order/transfom/groupby/get",a).then(v=>{
-        alert("Hellow")
-        setPhieuChuyenGiao(v.data.data)
-      }).catch(error=>{
-        alert("Có lỗi lấy dữ liệu")
-      })
-    }else{
-      alert("Chưa chọn đơn hàng nào để lập phiếu chuyển giao")
+  const clickPhieuChuyenGiao = () => {
+    let a = filter.orders.filter((v) => v.checked).map((v) => v.id);
+    if (a.length > 0) {
+      apiAdmin
+        .post("order/transfom/groupby/get", a)
+        .then((v) => {
+          setPhieuChuyenGiao(v.data.data);
+        })
+        .catch((error) => {
+          alert("Không có đơn hàng nào cần chuyển tiếp");
+        });
+    } else {
+      alert("Chưa chọn đơn hàng nào để lập phiếu chuyển giao");
     }
+  };
 
-  }
-
-  const exportPDF=()=>{
-    let ids=filter.orders.filter(v=>v.checked).map(v=>v.id);
+  const exportPDF = () => {
+    let ids = filter.orders.filter((v) => v.checked).map((v) => v.id);
     try {
-      if(ids.length>0){
-        apiAdmin.post("order/export-pdf", ids, { responseType: "blob" })
-  .then(response => {
-    const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "order.pdf";  // Đặt tên file
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  })
-  .catch(error => {
-    alert("Lỗi khi tải PDF:", error);
-  });
-
+      if (ids.length > 0) {
+        apiAdmin
+          .post("order/export-pdf", ids, { responseType: "blob" })
+          .then((response) => {
+            const url = window.URL.createObjectURL(
+              new Blob([response.data], { type: "application/pdf" })
+            );
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "order.pdf"; // Đặt tên file
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+          })
+          .catch((error) => {
+            alert("Lỗi khi tải PDF:", error);
+          });
       }
-    } catch (error) {
-      
-    }
-  }
+    } catch (error) {}
+  };
 
   useEffect(() => {
     apiAdmin
@@ -114,18 +116,25 @@ const OrderListAdmin = () => {
       });
   };
 
-  const cancelList=()=>{
+  const cancelList = () => {
     const fetching = document.getElementById("cancel");
     fetching.classList.remove("hidden");
-    apiAdmin.post("order/cancellist",filter.orders.filter(v=>v.checked).map(v=>v.id)).then(v=>{
-      alert("Hủy thành công")
-      search()
-    }).catch(error=>{
-      alert(error.response.data.message)
-    }).finally(()=>{
-      fetching.classList.add("hidden");
-    })
-  }
+    apiAdmin
+      .post(
+        "order/cancellist",
+        filter.orders.filter((v) => v.checked).map((v) => v.id)
+      )
+      .then((v) => {
+        alert("Hủy thành công");
+        search();
+      })
+      .catch((error) => {
+        alert(error.response.data.message);
+      })
+      .finally(() => {
+        fetching.classList.add("hidden");
+      });
+  };
 
   const fetching = () => {
     const fetching = document.getElementById("fetching");
@@ -142,26 +151,37 @@ const OrderListAdmin = () => {
         a.click();
         window.URL.revokeObjectURL(url);
       })
-      .catch((error) => { 
-        alert(error.response.status===400?"Không có đơn hàng nào cần chuyển tiếp":"Có lỗi xảy ra");
+      .catch((error) => {
+        alert(
+          error.response.status === 400
+            ? "Không có đơn hàng nào cần chuyển tiếp"
+            : "Có lỗi xảy ra"
+        );
       })
       .finally(() => {
         fetching.classList.add("hidden");
       });
   };
 
-  const nhanKho=()=>{
+  const nhanKho = () => {
     const fetching = document.getElementById("nhapKho");
     fetching.classList.remove("hidden");
-    apiAdmin.post("order/nextstatuslist",filter.orders.filter(v=>v.checked).map(v=>v.id)).then(v=>{
-      alert("Nhập kho Thành công")
-      search()
-    }).catch(error=>{
-      alert(error.response.data.message)
-    }).finally(()=>{
-      fetching.classList.add("hidden");
-    })
-  }
+    apiAdmin
+      .post(
+        "order/nextstatuslist",
+        filter.orders.filter((v) => v.checked).map((v) => v.id)
+      )
+      .then((v) => {
+        alert("Nhập kho Thành công");
+        search();
+      })
+      .catch((error) => {
+        alert(error.response.data.message);
+      })
+      .finally(() => {
+        fetching.classList.add("hidden");
+      });
+  };
 
   const search = () => {
     apiAdmin
@@ -208,11 +228,10 @@ const OrderListAdmin = () => {
 
   useEffect(search, []);
 
-
-  const reload=()=>{
+  const reload = () => {
     search();
-    setPhieuChuyenGiao([])
-  }
+    setPhieuChuyenGiao([]);
+  };
 
   const changeString = (key, value) => {
     if (String(value) && new String(value).trim().length > 0) {
@@ -253,10 +272,14 @@ const OrderListAdmin = () => {
   };
 
   return (
-    <> 
+    <>
+      <Breadcrumb>
+        <BreadcrumbItem>Admin</BreadcrumbItem>
+        <BreadcrumbItem>Order</BreadcrumbItem>
+        <BreadcrumbItem>Order list</BreadcrumbItem>
+      </Breadcrumb>
       <OrderAmindTab setTab={changeNumber} />
       <div className="w-full">
-        <p>Filter</p>
         <div className="w-full flex gap-1 items-center">
           <Input
             value={filter.id}
@@ -303,7 +326,12 @@ const OrderListAdmin = () => {
               },
             ]}
           />
-          {filter.trangThaiId===5&&<ModalInfoPhieuChuyenGiao reloads={reload}  phieuChuyenGiaos={phieuChuyenGiaos}/>}
+          {filter.trangThaiId === 5 && (
+            <ModalInfoPhieuChuyenGiao
+              reloads={reload}
+              phieuChuyenGiaos={phieuChuyenGiaos}
+            />
+          )}
           {filter.trangThaiId === 4 && (
             <Select
               prefix={<SearchOutlined style={{ color: "#bbb" }} />}
@@ -325,34 +353,53 @@ const OrderListAdmin = () => {
               options={shipper}
             />
           )}
-          {filter.orders.filter(v=>v.checked).length>0&&<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Button onClick={exportPDF} primary>
-               Export PDFs
-              <SyncOutlined className="hidden" id="fetching" spin />
-            </Button>
-          </div>}
+          {filter.orders.filter((v) => v.checked).length > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <Button onClick={exportPDF} primary>
+                Export PDFs
+                <SyncOutlined className="hidden" id="fetching" spin />
+              </Button>
+            </div>
+          )}
 
-          {filter.orders.filter(v=>v.checked).length>0&&filter.trangThaiId===5&&<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Button onClick={()=>{
-              clickPhieuChuyenGiao()
-            }} primary>
-               Chuyển tiếp hàng loạt
-              <SyncOutlined className="hidden" id="fetching" spin />
-            </Button>
-          </div>}
-          {filter.orders.filter(v=>v.checked).length>0&&filter.trangThaiId<5&&<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Button onClick={cancelList}  danger  >
-               Hủy đơn
-              <SyncOutlined className="hidden" id="cancel" spin />
-            </Button>
-          </div>}
-          {filter.orders.filter(v=>v.checked).length>0&&filter.trangThaiId===4&&<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Button onClick={nhanKho}  danger  >
-               Nhập kho.
-              <SyncOutlined className="hidden" id="nhapKho" spin />
-            </Button>
-          </div>}
-          
+          {filter.orders.filter((v) => v.checked).length > 0 &&
+            filter.trangThaiId === 5 && (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                <Button
+                  onClick={() => {
+                    clickPhieuChuyenGiao();
+                  }}
+                  primary
+                >
+                  Chuyển tiếp hàng loạt
+                  <SyncOutlined className="hidden" id="fetching" spin />
+                </Button>
+              </div>
+            )}
+          {filter.orders.filter((v) => v.checked).length > 0 &&
+            filter.trangThaiId < 5 && (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                <Button onClick={cancelList} danger>
+                  Hủy đơn
+                  <SyncOutlined className="hidden" id="cancel" spin />
+                </Button>
+              </div>
+            )}
+          {filter.orders.filter((v) => v.checked).length > 0 &&
+            filter.trangThaiId === 4 && (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                <Button onClick={nhanKho} danger>
+                  Nhập kho.
+                  <SyncOutlined className="hidden" id="nhapKho" spin />
+                </Button>
+              </div>
+            )}
         </div>
       </div>
       <div className="overflow-x-auto mt-3">
@@ -376,7 +423,7 @@ const OrderListAdmin = () => {
             {filter.orders.map((order, index) => (
               <tr key={order.id} className="border-b hover:bg-gray-50">
                 <td className="py-2 px-2">
-                  <Checkbox  onClick={checkOrder.bind(null,index)}   /> 
+                  <Checkbox onClick={checkOrder.bind(null, index)} />
                   {order.phanCongs.filter((v) => v.trangThai === 1).length >
                     2 && (
                     <Tooltip
@@ -552,7 +599,7 @@ const OrderListAdmin = () => {
                                           ? "Đang thực hiện"
                                           : v.trangThai === 1
                                           ? "Không thành công"
-                                          :v.trangThai === 0
+                                          : v.trangThai === 0
                                           ? "Đang thực hiện"
                                           : v.trangThai === 2
                                           ? "Thành công"

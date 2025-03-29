@@ -11,8 +11,8 @@ const PickBuuCuc = ({ info, setInfo, base }) => {
 
   const [open, setOpen] = useState(false); 
   useEffect(() => {
-    if (info.xa != undefined) {
-      fetch(`http://localhost:8080/getbuucucnear?lat=${info.xa.viDo}&longti=${info.xa.kinhDo}`)
+    if (info.latSend!==-1||info.longSend!==-1) {
+      fetch(`http://localhost:8080/getbuucucnear?lat=${info.latSend}&longti=${info.longSend}`)
         .then((v) => v.json())
         .then((v) => {
           setBuuCucs(v);

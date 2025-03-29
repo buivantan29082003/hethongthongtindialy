@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import MyAddress from "./MyAddress";
-import { CheckCircleFilled, SearchOutlined, YoutubeOutlined } from "@ant-design/icons";
-import { Input, Pagination, Select, Tag } from "antd";
+import {
+  CheckCircleFilled,
+  SearchOutlined,
+  SyncOutlined,
+  YoutubeOutlined,
+} from "@ant-design/icons";
+import { Button, Checkbox, Input, Pagination, Select, Tag } from "antd";
 import { Option } from "antd/es/mentions";
 import api from "../../Config/APICONFIG/CustomerApi";
 import { useNavigate } from "react-router-dom";
@@ -14,15 +19,23 @@ const OrderList = () => {
       .then((v) => {
         alert("Hủy đơn hàng thành công");
         search();
-      }).catch(error=>{
-        alert(error.respone.message)
       })
+      .catch((error) => {
+        alert(error.respone.message);
+      });
   };
+
+  const [changeState,setChangeState]=useState(true)
+  const changeChecked=(index)=>{
+    filter.orders[index].checked=filter.orders[index].checked===undefined?false:true;
+    filter.orders[index].checked=!filter.orders[index].checked;
+    setChangeState(!changeState)
+  }
 
   const search = () => {
     api
       .get(
-        `/test?trangThaiId=${filter.trangThaiId}${
+        `/customer/orders?trangThaiId=${filter.trangThaiId}${
           filter.id != null ? `&id=${filter.id}` : ``
         }${
           filter.tenNguoiNhan != null
@@ -43,7 +56,7 @@ const OrderList = () => {
       });
   };
 
-  const navigate=useNavigate()
+  const navigate = useNavigate();
 
   useEffect(search, []);
 
@@ -56,13 +69,38 @@ const OrderList = () => {
     search();
   };
 
-  const changeString = (key, value) => { 
+  const changeString = (key, value) => {
     if (String(value) && new String(value).trim().length > 0) {
       filter[key] = value;
     } else {
       filter[key] = null;
     }
-     search();
+    search();
+  };
+
+  const exportPDF = () => {
+    let ids = filter.orders.filter((v) => v.checked).map((v) => v.id);
+    try {
+      if (ids.length > 0) {
+        api
+          .post("/customer/order/export-pdf", ids, { responseType: "blob" })
+          .then((response) => {
+            const url = window.URL.createObjectURL(
+              new Blob([response.data], { type: "application/pdf" })
+            );
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "order.pdf"; // Đặt tên file
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+          })
+          .catch((error) => {
+            alert("Lỗi khi tải PDF:", error);
+          });
+      }
+    } catch (error) {}
   };
 
   const [filter, setFilter] = useState({
@@ -74,14 +112,19 @@ const OrderList = () => {
     page: 0,
     totalPage: 0,
     orders: [],
-  });  
+  });
   return (
     <>
-    <div style={{position:"absolute",left:"50%",right:"50%",zIndex:999}}>
-      <div dicumen className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-75 text-white p-4 rounded-xl flex items-center space-x-3 shadow-lg animate-fade-in-out">
-            <CheckCircleFilled className="text-green-500 w-6 h-6" />
-            <span>Sản phẩm đã được thêm vào Giỏ hàng</span>
-          </div> 
+      <div
+        style={{ position: "absolute", left: "50%", right: "50%", zIndex: 999 }}
+      >
+        <div
+          dicumen
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-75 text-white p-4 rounded-xl flex items-center space-x-3 shadow-lg animate-fade-in-out"
+        >
+          <CheckCircleFilled className="text-green-500 w-6 h-6" />
+          <span>Sản phẩm đã được thêm vào Giỏ hàng</span>
+        </div>
       </div>
       <MyAddress setTab={changeNumber} />
       <div className="w-full">
@@ -108,8 +151,8 @@ const OrderList = () => {
           <Select
             prefix={<SearchOutlined style={{ color: "#bbb" }} />}
             showSearch
-            onChange={(e) => { 
-              changeString("sortBy",e)
+            onChange={(e) => {
+              changeString("sortBy", e);
             }}
             style={{
               width: 200,
@@ -145,6 +188,14 @@ const OrderList = () => {
               <Option value={10}>10 / page</Option>
               <Option value={20}>20 / page</Option>
             </Select>
+            {filter.orders.filter((v) => v.checked).length > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <Button onClick={exportPDF} primary>
+                Export PDFs
+                <SyncOutlined className="hidden" id="fetching" spin />
+              </Button>
+            </div>
+          )}
           </div>
         </div>
       </div>
@@ -165,10 +216,19 @@ const OrderList = () => {
           </thead>
           <tbody>
             {filter.orders.map((order, index) => (
-              <tr onClick={navigate.bind(null,"/customer/updateOrder/"+order.id+"/"+order.trangThai.id)} key={order.id} className="border-b hover:bg-gray-50">
-                <td className="py-2 px-4">{index + 1}</td>
-                <td className="py-2 px-4 text-blue-600 font-semibold">
-                  DH{order.id}
+              <tr
+               
+                key={order.id}
+                className="border-b hover:bg-gray-50"
+              >
+                <td className="py-2 px-4"> <Checkbox onClick={()=>{
+                  changeChecked(index)
+                }} checked={order.checked===true} />{index + 1} </td>
+                <td  onClick={navigate.bind(
+                  null,
+                  "/customer/updateOrder/" + order.id + "/" + order.trangThai.id
+                )} className="py-2 px-4 text-blue-600 font-semibold">
+                  DH{order.id} 
                   <p>Đã lấy hàng</p>
                 </td>
                 <td className="py-2 px-4">
@@ -210,7 +270,7 @@ const OrderList = () => {
                   </button>
                 </td>
                 <td>
-                  {(filter.trangThaiId == 1||filter.trangThaiId==3) && (
+                  {(filter.trangThaiId == 1 || filter.trangThaiId == 3) && (
                     <Action cancelOrder={cancelOrder.bind(null, order.id)} />
                   )}
                 </td>
@@ -234,7 +294,12 @@ const styleInput = {
 const Action = ({ cancelOrder }) => {
   return (
     <>
-      <Tag className="cursor-pointer" onClick={cancelOrder} icon={<YoutubeOutlined />} color="#cd201f">
+      <Tag
+        className="cursor-pointer"
+        onClick={cancelOrder}
+        icon={<YoutubeOutlined />}
+        color="#cd201f"
+      >
         Hủy đơn
       </Tag>
     </>

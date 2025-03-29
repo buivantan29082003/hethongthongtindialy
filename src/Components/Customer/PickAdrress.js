@@ -6,7 +6,7 @@ import mapBoxConfig from "../../Config/MapboxConfig";
 
 mapboxgl.accessToken = mapBoxConfig.accessToken;
 
-const PickAddress = ({setDiaChi}) => {
+const PickAddress = ({setDiaChi,type}) => {
   const [open, setOpen] = useState(false);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -44,12 +44,21 @@ const PickAddress = ({setDiaChi}) => {
  
   const handleSelectLocation = (place) => {
     const [lng, lat] = place.center;  
-    setDiaChi(prevState => ({
-      ...prevState,
-      diaChiChiTiet: place.place_name,
-      viDo: lat,
-      kinhDo: lng,
-  })); 
+    if(type===1){
+      setDiaChi(prevState => ({
+          ...prevState,
+          diaChiNguoiGui: place.place_name,
+          latSend: lat,
+          longSend: lng,
+      }));
+    } else{
+      setDiaChi(prevState => ({
+          ...prevState,
+          diaChiChiTiet: place.place_name,
+          viDo: lat,
+          kinhDo: lng,
+      }));
+    }
     if (mapRef.current) {
       mapRef.current.flyTo({ center: [lng, lat], zoom: 15 });
     } 
